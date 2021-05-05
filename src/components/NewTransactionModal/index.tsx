@@ -1,8 +1,9 @@
-import { useState } from "react";
+import React, { useState, FormEvent } from "react";
 import Modal from "react-modal";
 import closeImg from "../../assets/close.svg";
 import incomeImg from "../../assets/income.svg";
 import outcomeImg from "../../assets/outcome.svg";
+import { api } from "../../services/api";
 import { Container, TransactionTypeContainer, RadioBox } from "./styles";
 
 interface NewTransactionModalProps {
@@ -14,7 +15,23 @@ export function NewTransactionModal({
   isOpen,
   onRequestClose,
 }: NewTransactionModalProps) {
+  const [title, setTitle] = useState("");
+  const [amount, setAmount] = useState(0);
+  const [category, setCategory] = useState("");
   const [type, setType] = useState("deposit");
+
+  function handleCreateNewTransaction(event: FormEvent) {
+    event.preventDefault();
+
+    const data = {
+      title,
+      amount,
+      category,
+      type,
+    };
+
+    api.post("transactions", data);
+  }
 
   return (
     <Modal
@@ -27,11 +44,20 @@ export function NewTransactionModal({
         <img src={closeImg} alt="Close modal" onClick={onRequestClose} />
       </button>
 
-      <Container>
+      <Container onSubmit={handleCreateNewTransaction}>
         <h2>Register new transaction</h2>
 
-        <input placeholder="Title" />
-        <input placeholder="Amount" type="number" />
+        <input
+          placeholder="Title"
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+        />
+        <input
+          placeholder="Amount"
+          type="number"
+          value={amount}
+          onChange={(event) => setAmount(Number(event.target.value))}
+        />
 
         <TransactionTypeContainer>
           <RadioBox
@@ -54,7 +80,11 @@ export function NewTransactionModal({
           </RadioBox>
         </TransactionTypeContainer>
 
-        <input placeholder="Category" />
+        <input
+          placeholder="Category"
+          value={category}
+          onChange={(event) => setCategory(event.target.value)}
+        />
 
         <button type="submit">Register</button>
       </Container>
